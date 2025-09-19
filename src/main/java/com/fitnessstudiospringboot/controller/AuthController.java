@@ -1,14 +1,15 @@
 package com.fitnessstudiospringboot.controller;
 
 import com.fitnessstudiospringboot.controller.bean.RegistrationBean;
-import org.springframework.ui.Model;
 import com.fitnessstudiospringboot.model.User;
 import com.fitnessstudiospringboot.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +51,7 @@ public class AuthController {
     @PostMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/classes"; // redirect to classes page after logout
+        return "redirect:/fitnessClasses";
     }
 
     @GetMapping("/confirmation")
@@ -61,60 +62,92 @@ public class AuthController {
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
         model.addAttribute("bean", new RegistrationBean());
+        model.addAttribute("errors", new HashMap<String, String>());
         return "registerView";
     }
 
     @PostMapping("/register")
     public String register(
-            @ModelAttribute RegistrationBean regFormBean,
-            @RequestParam("avatar") MultipartFile avatar,
+            @ModelAttribute RegistrationBean bean,
             HttpSession session,
             Model model) throws IOException {
 
-        Map<String, String> errors = validate(regFormBean);
+        Map<String, String> errors = validate(bean);
 
         if (!errors.isEmpty()) {
-            regFormBean.setPassword1("");
-            regFormBean.setPassword2("");
-            model.addAttribute("bean", regFormBean);
+            bean.setPassword1("");
+            bean.setPassword2("");
+            model.addAttribute("bean", bean);
             model.addAttribute("errors", errors);
             return "registerView";
         }
 
+        MultipartFile avatar = bean.getAvatarFile();
         // Handle avatar upload
         if (!avatar.isEmpty()) {
             String ext = Objects.requireNonNull(avatar.getOriginalFilename())
                     .substring(avatar.getOriginalFilename().lastIndexOf("."));
             String avatarName = UUID.randomUUID() + ext;
-            avatar.transferTo(new java.io.File("uploads/" + avatarName)); // store locally
-            regFormBean.setAvatar(avatarName);
+            avatar.transferTo(new File("uploads/" + avatarName)); // store locally
+            bean.setAvatar(avatarName); // store path in bean
         }
 
-        userService.add(transformToDomain(regFormBean));
+        userService.add(transformToDomain(bean));
 
-        session.setAttribute("username", regFormBean.getUsername());
-        session.setAttribute("name", regFormBean.getName());
-        session.setAttribute("avatar", regFormBean.getAvatar());
+        session.setAttribute("username", bean.getUsername());
+        session.setAttribute("name", bean.getName());
+        session.setAttribute("avatar", bean.getAvatar());
 
         return "redirect:/confirmation";
     }
 
     private Map<String, String> validate(RegistrationBean bean) {
         Map<String, String> errors = new HashMap<>();
-        validateString(bean.getUsername(), "\\w{2,16}", "username", errors);
-        validateString(bean.getPassword1(), "\\w{4,32}", "password1", errors);
-        validateString(bean.getName(), ".{2,32}", "name", errors);
-        validateString(bean.getEmail(), "\\w+@(\\w+[.])+\\w+", "email", errors);
-        if (bean.getPassword1() != null && !bean.getPassword1().equals(bean.getPassword2())) {
+
+        // Username
+        if (bean.getUsername() == null || bean.getUsername().isBlank()) {
+            errors.put("username", "Username cannot be empty");
+        } else if (bean.getUsername().length() < 2) {
+            errors.put("username", "Username is too short (min 2 characters)");
+        } else if (bean.getUsername().length() > 16) {
+            errors.put("username", "Username is too long (max 16 characters)");
+        } else if (!bean.getUsername().matches("\\w+")) {
+            errors.put("username", "Username can only contain letters, numbers, and underscores");
+        }
+
+        // Password
+        if (bean.getPassword1() == null || bean.getPassword1().isBlank()) {
+            errors.put("password1", "Password cannot be empty");
+        } else if (bean.getPassword1().length() < 4) {
+            errors.put("password1", "Password is too short (min 4 characters)");
+        } else if (bean.getPassword1().length() > 32) {
+            errors.put("password1", "Password is too long (max 32 characters)");
+        }
+
+        // Repeat password
+        if (bean.getPassword2() == null || bean.getPassword2().isBlank()) {
+            errors.put("password2", "Please repeat your password");
+        } else if (!bean.getPassword2().equals(bean.getPassword1())) {
             errors.put("password2", "Passwords do not match");
         }
-        return errors;
-    }
 
-    private void validateString(String str, String pattern, String key, Map<String, String> map) {
-        if (str == null || !str.matches(pattern)) {
-            map.put(key, "Invalid or empty value");
+        // Name
+        if (bean.getName() == null || bean.getName().isBlank()) {
+            errors.put("name", "Full name cannot be empty");
+        } else if (bean.getName().length() < 2) {
+            errors.put("name", "Full name is too short (min 2 characters)");
+        } else if (bean.getName().length() > 32) {
+            errors.put("name", "Full name is too long (max 32 characters)");
         }
+
+        // Email
+        if (bean.getEmail() == null || bean.getEmail().isBlank()) {
+            errors.put("email", "Email cannot be empty");
+        } else if (!bean.getEmail().matches("\\w+@(\\w+\\.)+\\w+")) {
+            errors.put("email", "Email format is invalid");
+        }
+
+        return errors;
     }
 
     private User transformToDomain(RegistrationBean bean) {

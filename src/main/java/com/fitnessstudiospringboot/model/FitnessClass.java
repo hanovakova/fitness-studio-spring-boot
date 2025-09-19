@@ -106,4 +106,8 @@ public class FitnessClass {
     public void setName(String name) {
         this.name = name;
     }
+
+    public String getClassType() {
+        return this.getClass().getSimpleName();
+    }
 }

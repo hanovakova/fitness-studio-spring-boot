@@ -1,5 +1,9 @@
 package com.fitnessstudiospringboot.controller.bean;
 
+import org.springframework.web.multipart.MultipartFile;
+
+import java.beans.Transient;
+
 public class RegistrationBean {
     private String username;
     private String password1;
@@ -8,6 +12,7 @@ public class RegistrationBean {
     private String email;
     private boolean advertisement;
     private String avatar;
+    private MultipartFile avatarFile;
 
     public String getUsername() {
         return username;
@@ -63,5 +68,13 @@ public class RegistrationBean {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
+    }
+
+    public MultipartFile getAvatarFile() {
+        return avatarFile;
+    }
+
+    public void setAvatarFile(MultipartFile avatarFile) {
+        this.avatarFile = avatarFile;
     }
 }

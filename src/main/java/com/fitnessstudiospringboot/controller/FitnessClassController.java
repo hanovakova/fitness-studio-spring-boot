@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/classes")
+@RequestMapping("/fitnessClasses")
 public class FitnessClassController {
 
     private final FitnessClassService fitnessClassService;
@@ -33,8 +33,8 @@ public class FitnessClassController {
         model.addAttribute("fitnessClasses", classes);
 
         boolean loggedIn = false;
-        Map<Integer, Boolean> classIdsPaid = new HashMap<>();
-        Map<Integer, Boolean> classIdsCapacityExceeded = new HashMap<>();
+        Map<String, Boolean> classIdsPaid = new HashMap<>();
+        Map<String, Boolean> classIdsCapacityExceeded = new HashMap<>();
 
         Integer userId = (Integer) session.getAttribute("userId");
         if (userId != null) {
@@ -43,20 +43,22 @@ public class FitnessClassController {
             List<Integer> enrolledClassIds = userClassService.getEnrolledClassIds(userId);
             for (Integer classId : enrolledClassIds) {
                 UserClassKey key = new UserClassKey(classId, userId);
-                classIdsPaid.put(classId, userClassService.isPaid(key));
+                classIdsPaid.put(String.valueOf(classId), userClassService.isPaid(key));
             }
         }
 
         for (FitnessClass fitnessClass : classes) {
-            classIdsCapacityExceeded.put(fitnessClass.getId(),
-                    userClassService.isClassCapacityExceeded(fitnessClass.getId()));
+            classIdsCapacityExceeded.put(
+                    String.valueOf(fitnessClass.getId()),
+                    userClassService.isClassCapacityExceeded(fitnessClass.getId())
+            );
         }
 
         model.addAttribute("loggedIn", loggedIn);
         model.addAttribute("classIdsPaid", classIdsPaid);
         model.addAttribute("classIdsCapacityExceeded", classIdsCapacityExceeded);
 
-        return "classesView";
+        return "fitnessClassesView";
     }
 
     @PostMapping

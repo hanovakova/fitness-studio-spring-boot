@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Your Classes</title>
-    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
 </head>
 <body>
 <#include "headerView.ftl">
@@ -57,6 +57,6 @@
         </button>
     </div>
 </form>
-<p><a href="/classes">View other classes</a></p>
+<p><a href="/fitnessClasses">View other classes</a></p>
 </body>
 </html>

@@ -1,4 +1,4 @@
-<link rel="stylesheet" type="text/css" href="/static/css/style.css">
+<link rel="stylesheet" type="text/css" href="/css/style.css">
 
 <div class="nav-bar">
     <#if !loggedIn?? || !loggedIn>
@@ -11,7 +11,7 @@
         <form id="logoutForm" action="/logout" method="post" style="display: none;"></form>
     </#if>
 
-    <p><a href="/classes">Fitness Classes</a></p>
+    <p><a href="/fitnessClasses">Fitness Classes</a></p>
 
     <label for="langSelect">🌐 Language:</label>
     <select id="langSelect">

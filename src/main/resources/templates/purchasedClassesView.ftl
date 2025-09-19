@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <title>Purchased Classes</title>
-    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
 </head>
 <body>
 <div class="container">
@@ -32,7 +32,7 @@
         </#list>
         </tbody>
     </table>
-    <p class="center"><a href="/classes">View other classes</a></p>
+    <p class="center"><a href="/fitnessClasses">View other classes</a></p>
 </div>
 </body>
 </html>
