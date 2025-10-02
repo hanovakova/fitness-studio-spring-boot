@@ -28,9 +28,19 @@ public class FitnessClassController {
     }
 
     @GetMapping
-    public String showClasses(Model model, HttpSession session) {
-        List<FitnessClass> classes = fitnessClassService.getClasses();
-        model.addAttribute("fitnessClasses", classes);
+    public String showClasses(
+            @RequestParam(required = false) String classTime,
+            @RequestParam(required = false) String classType,
+            Model model, HttpSession session) {
+
+        List<FitnessClass> classes;
+        if (classTime != null && !classTime.isBlank()) {
+            classes = fitnessClassService.getClassesByTimeFrame(classTime.toLowerCase());
+        } else if (classType != null && !classType.isBlank()) {
+            classes = fitnessClassService.getClassesByClassType(classType.toLowerCase());
+        } else {
+            classes = fitnessClassService.getClasses();
+        }
 
         boolean loggedIn = false;
         Map<String, Boolean> classIdsPaid = new HashMap<>();
@@ -53,7 +63,15 @@ public class FitnessClassController {
                     userClassService.isClassCapacityExceeded(fitnessClass.getId())
             );
         }
-
+        model.addAttribute("timeOptions", List.of("Morning", "Afternoon", "Evening"));
+        model.addAttribute("typeOptions", Map.of(
+                "FitnessClass", "Fitness Class",
+                "YogaClass", "Yoga",
+                "SpinningClass", "Spinning"
+        ));
+        model.addAttribute("fitnessClasses", classes);
+        model.addAttribute("classTime", classTime);
+        model.addAttribute("classType", classType);
         model.addAttribute("loggedIn", loggedIn);
         model.addAttribute("classIdsPaid", classIdsPaid);
         model.addAttribute("classIdsCapacityExceeded", classIdsCapacityExceeded);

@@ -167,3 +167,31 @@ input[type="checkbox"] {
     height: 60px;
     border-radius: 15%;
 }
+
+.class-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.filters {
+    width: 200px;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.filters label {
+    display: block;
+    margin: 10px 0 5px;
+    font-weight: bold;
+}
+
+.filters select {
+    width: 100%;
+    padding: 6px;
+    margin-bottom: 15px;
+}
+
+.table-container {
+    flex: 1;
+}
