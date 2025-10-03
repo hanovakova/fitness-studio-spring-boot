@@ -10,12 +10,16 @@
     <form class="styled-form" action="/login" method="post">
         <h2>Login</h2>
 
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
+        <label for="username">Username:
+            <input type="text" id="username" name="username" required>
+        </label>
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-
+        <label for="password">Password:
+            <input type="password" id="password" name="password" required>
+            <#if error??>
+                <span class="err">${error}</span>
+            </#if>
+        </label>
         <button class="styled-button" type="submit">Login</button>
     </form>
 </div>

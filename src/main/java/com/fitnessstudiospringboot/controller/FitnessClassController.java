@@ -33,13 +33,13 @@ public class FitnessClassController {
             @RequestParam(required = false) String classType,
             Model model, HttpSession session) {
 
-        List<FitnessClass> classes;
+        List<FitnessClass> classes = fitnessClassService.getClasses();
         if (classTime != null && !classTime.isBlank()) {
-            classes = fitnessClassService.getClassesByTimeFrame(classTime.toLowerCase());
-        } else if (classType != null && !classType.isBlank()) {
-            classes = fitnessClassService.getClassesByClassType(classType.toLowerCase());
-        } else {
-            classes = fitnessClassService.getClasses();
+            classes = fitnessClassService.getClassesByTimeFrame(classTime.toLowerCase(), classes);
+        }
+
+        if (classType != null && !classType.isBlank()) {
+            classes = fitnessClassService.getClassesByClassType(classType.toLowerCase(), classes);
         }
 
         boolean loggedIn = false;

@@ -39,5 +39,4 @@ public class GlobalModelAttributes {
         model.addAttribute("registrationQuestion", messageSource.getMessage("registration.question", null, locale));
         model.addAttribute("registrationLogin", messageSource.getMessage("registration.login", null, locale));
     }
-
 }
