@@ -36,7 +36,6 @@ public class AuthController {
             @RequestParam String password,
             HttpSession session,
             Model model) {
-
         User user = userService.validateUser(username, password);
         if (user != null) {
             session.setAttribute("userId", user.getId());
@@ -96,6 +95,7 @@ public class AuthController {
 
         session.setAttribute("username", bean.getUsername());
         session.setAttribute("name", bean.getName());
+        session.setAttribute("loggedIn", true);
         session.setAttribute("avatar", bean.getAvatar());
 
         return "redirect:/confirmation";

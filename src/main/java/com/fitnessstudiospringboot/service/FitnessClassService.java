@@ -32,34 +32,26 @@ public class FitnessClassService {
     }
 
     @Transactional(readOnly = true)
-    public List<FitnessClass> getClassesByTimeFrame(String timeFrame) {
+    public List<FitnessClass> getClassesByTimeFrame(String timeFrame, List<FitnessClass> classes) {
         int startHour, endHour;
 
         endHour = switch (timeFrame.toLowerCase()) {
-            case "morning" -> {
-                startHour = 6;
-                yield 12;
-            }
-            case "afternoon" -> {
-                startHour = 12;
-                yield 18;
-            }
-            case "evening" -> {
-                startHour = 18;
-                yield 23;
-            }
-            default -> {
-                startHour = 0;
-                yield 23;
-            }
+            case "morning" -> { startHour = 6; yield 12; }
+            case "afternoon" -> { startHour = 12; yield 18; }
+            case "evening" -> { startHour = 18; yield 23; }
+            default -> { startHour = 0; yield 23; }
         };
 
-        return repo.findClassesByHourRange(startHour, endHour);
+        return classes.stream()
+                .filter(c -> {
+                    int hour = c.getStartTime().getHours();
+                    return hour >= startHour && hour < endHour;
+                })
+                .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<FitnessClass> getClassesByClassType(String classType) {
-        List<FitnessClass> classes = this.getClasses();
+    public List<FitnessClass> getClassesByClassType(String classType, List<FitnessClass> classes) {
         return classes.stream().filter(c -> classType.equalsIgnoreCase(c.getClassType()))
                 .toList();
     }

@@ -12,7 +12,7 @@
 
         <label>${registrationUsername}
             <input type="text" id="username" name="username"
-                   value="${username!}"
+                   value="${bean.username!}"
                    class="<#if errors.username??>error-input</#if>"
                    required>
             <span class="err">${errors.username!}</span>
@@ -34,7 +34,7 @@
 
         <label>${registrationFullName}
             <input type="text" id="name" name="name"
-                   value="${name!}"
+                   value="${bean.name!}"
                    class="<#if errors.name??>error-input</#if>"
                    required>
             <span class="err">${errors.name!}</span>
@@ -42,7 +42,7 @@
 
         <label>${registrationEmail}
             <input type="text" id="email" name="email"
-                   value="${email!}"
+                   value="${bean.email!}"
                    class="<#if errors.email??>error-input</#if>"
                    required>
             <span class="err">${errors.email!}</span>
@@ -50,7 +50,7 @@
 
         <label>${registrationAdvertisement}
             <input type="checkbox" name="advert" value="yes"
-                   <#if advert?? && advert>checked</#if>>
+                   <#if bean.advert?? && bean.advert>checked</#if>>
         </label>
 
         <label>Avatar (optional):
