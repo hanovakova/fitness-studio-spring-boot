@@ -40,10 +40,18 @@
                id="creditCard"
                name="creditCard"
                required
-               maxlength="16"
-               pattern="\\d{16}"
-               inputmode="numeric"
-               title="Please enter a 16-digit credit card number"/>
+               maxlength="19"
+        inputmode="numeric"
+        pattern="\d{4}\s\d{4}\s\d{4}\s\d{4}"
+        title="Please enter a 16-digit credit card number in groups of 4" />
+
+        <script>
+            document.getElementById('creditCard').addEventListener('input', function (e) {
+                let value = e.target.value.replace(/\D/g, '');
+                value = value.substring(0, 16);
+                e.target.value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+            });
+        </script>
 
         <button class="styled-button" type="submit">Confirm Payment</button>
     </form>

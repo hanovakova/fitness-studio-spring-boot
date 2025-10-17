@@ -40,6 +40,7 @@ public class AuthController {
         if (user != null) {
             session.setAttribute("userId", user.getId());
             session.setAttribute("username", user.getUsername());
+            session.setAttribute("loggedIn", true);
             return "redirect:/confirmation";
         } else {
             model.addAttribute("error", "Invalid username or password");
@@ -91,8 +92,9 @@ public class AuthController {
             bean.setAvatar(avatarName); // store path in bean
         }
 
-        userService.add(transformToDomain(bean));
+        Integer userId = userService.add(transformToDomain(bean));
 
+        session.setAttribute("userId", userId);
         session.setAttribute("username", bean.getUsername());
         session.setAttribute("name", bean.getName());
         session.setAttribute("loggedIn", true);

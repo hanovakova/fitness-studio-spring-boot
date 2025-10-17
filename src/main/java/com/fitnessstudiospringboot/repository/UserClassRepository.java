@@ -14,4 +14,7 @@ public interface UserClassRepository extends JpaRepository<UserClass, UserClassK
 
     @Query(value = "SELECT class_id FROM user_classes WHERE user_id = :userId", nativeQuery = true)
     List<Integer> getUserEnrolledClassIds(@Param("userId") int userId);
+
+    @Query("SELECT count(uc) FROM UserClass uc where uc.id.classId = :classId")
+    int countUserClassById(@Param("classId") int classId);
 }

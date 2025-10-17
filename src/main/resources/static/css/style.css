@@ -195,3 +195,8 @@ input[type="checkbox"] {
 .table-container {
     flex: 1;
 }
+
+.text-disabled-button {
+    color: gray;
+    font-weight: bold;
+}

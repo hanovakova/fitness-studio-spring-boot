@@ -14,8 +14,8 @@ public class UserService {
     }
 
     @Transactional
-    public void add(User user) {
-        repo.save(user);
+    public int add(User user) {
+        return repo.save(user).getId();
     }
 
     public User validateUser(final String username, final String password) {

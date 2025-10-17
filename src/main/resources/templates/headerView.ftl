@@ -12,6 +12,7 @@
     </#if>
 
     <p><a href="/fitnessClasses">Fitness Classes</a></p>
+    <p><a href="/user-classes/selected">Your Classes</a></p>
 
     <label for="langSelect">🌐 Language:</label>
     <select id="langSelect">

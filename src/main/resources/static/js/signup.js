@@ -1,9 +1,9 @@
-function signup(classId, button, contextPath, event) {
+function signup(button, event) {
     event.preventDefault();
     const form = button.closest("form");
     const formData = new FormData(form);
-
-    fetch(contextPath + "/viewClasses", {
+    console.log("Form data: ", formData)
+    fetch("/fitnessClasses", {
         method: 'POST',
         body: formData
     })

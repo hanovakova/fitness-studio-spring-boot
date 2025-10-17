@@ -31,7 +31,7 @@
             <td>${enrolledClass.instructorName}</td>
             <td>${enrolledClass.price}</td>
             <td>
-                <form class="table-form" action="/user-classes/selected" method="post">
+                <form class="table-form" action="/user-classes/drop" method="post">
                     <input type="hidden" name="enrolledClassId" value="${enrolledClass.id}"/>
                     <button class="delete-button" type="submit">Delete</button>
                 </form>

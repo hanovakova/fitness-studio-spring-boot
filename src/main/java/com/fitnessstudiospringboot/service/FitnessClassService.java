@@ -2,6 +2,7 @@ package com.fitnessstudiospringboot.service;
 
 import com.fitnessstudiospringboot.model.FitnessClass;
 import com.fitnessstudiospringboot.repository.FitnessClassRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,5 +55,16 @@ public class FitnessClassService {
     public List<FitnessClass> getClassesByClassType(String classType, List<FitnessClass> classes) {
         return classes.stream().filter(c -> classType.equalsIgnoreCase(c.getClassType()))
                 .toList();
+    }
+
+    @Transactional
+    public boolean isClassCapacityExceeded(Integer fitnessClassId, Integer numberOfSignedUpClasses) {
+
+        FitnessClass fitnessClass = repo.findByIdWithLock(fitnessClassId)
+                .orElseThrow(() -> new EntityNotFoundException("Fitness class not found with ID: " + fitnessClassId));
+
+        int classCapacity = fitnessClass.getCapacity();
+
+        return numberOfSignedUpClasses >= classCapacity;
     }
 }

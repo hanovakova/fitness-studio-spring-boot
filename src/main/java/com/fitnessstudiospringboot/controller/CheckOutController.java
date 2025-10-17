@@ -54,6 +54,6 @@ public class CheckOutController {
         session.setAttribute("purchasedClasses", purchasedClasses);
 
         // Redirect to purchased classes page
-        return "redirect:/purchasedClasses";
+        return "redirect:/user-classes/purchased";
     }
 }

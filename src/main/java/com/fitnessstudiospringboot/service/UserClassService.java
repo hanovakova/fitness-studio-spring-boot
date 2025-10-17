@@ -1,11 +1,11 @@
 package com.fitnessstudiospringboot.service;
 
-import com.fitnessstudiospringboot.model.FitnessClass;
 import com.fitnessstudiospringboot.model.UserClass;
 import com.fitnessstudiospringboot.model.UserClassKey;
 import com.fitnessstudiospringboot.repository.FitnessClassRepository;
 import com.fitnessstudiospringboot.repository.UserClassRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -21,21 +21,13 @@ public class UserClassService {
     }
 
     @Transactional(readOnly = true)
-    public boolean isClassCapacityExceeded(Integer fitnessClassId) {
-        int numberOfSignedUpClasses = userClassRepo.findAll().size();
-
-        FitnessClass fitnessClass = fitnessClassRepo.findById(fitnessClassId).orElse(null);
-        assert fitnessClass != null;
-        int classCapacity = fitnessClass.getCapacity();
-
-        return numberOfSignedUpClasses >= classCapacity;
+    public int getNumberOfSignedUpClasses(Integer fitnessClassId){
+        return userClassRepo.countUserClassById(fitnessClassId);
     }
 
-    @Transactional
-    public void signUp(UserClass userClass) {
-        UserClassKey userClassKey = userClass.getId();
-        Integer fitnessClassId = userClassKey.getClassId();
-        if (!isClassCapacityExceeded(fitnessClassId)) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void signUp(UserClass userClass, boolean isClassCapacityExceeded) {
+        if (!isClassCapacityExceeded) {
             userClassRepo.save(userClass);
         }
     }

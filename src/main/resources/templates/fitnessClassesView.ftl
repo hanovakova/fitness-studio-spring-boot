@@ -3,7 +3,7 @@
 <head>
     <title>Available Fitness Classes</title>
     <link rel="stylesheet" type="text/css" href="/css/style.css">
-    <script src="/static/js/signup.js"></script>
+    <script src="/js/signup.js"></script>
 </head>
 <body>
 <#include "headerView.ftl">
@@ -84,16 +84,18 @@
                     </td>
                     <td>
                         <#if classIdsPaid[fitnessClass.id?string]!false>
-                            <span style="color: gray; font-weight: bold;">Purchased</span>
+                            <span class="text-disabled-button">Purchased</span>
                         <#elseif classIdsCapacityExceeded[fitnessClass.id?string]!false>
-                            <span style="color: gray; font-weight: bold;">Class is Full</span>
-                        <#elseif (loggedIn!false == false)>
-                            <span style="color: gray; font-weight: bold;">Log In First</span>
+                            <span class="text-disabled-button">Class is Full</span>
+                        <#elseif enrolledClassIds?seq_contains(fitnessClass.id)>
+                            <span class="text-disabled-button">Already Signed Up</span>
+                        <#elseif !loggedIn>
+                            <span class="text-disabled-button">Log In First</span>
                         <#else>
                             <form class="table-form">
                                 <input type="hidden" name="classId" value="${fitnessClass.id}"/>
                                 <button class="table-button"
-                                        onclick="signup(${fitnessClass.id}, this, '', event)">Sign Up
+                                        onclick="signup(this, event)">Sign Up
                                 </button>
                             </form>
                         </#if>
