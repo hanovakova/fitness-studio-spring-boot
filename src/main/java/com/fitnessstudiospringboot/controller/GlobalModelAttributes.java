@@ -1,3 +1,4 @@
+/*
 package com.fitnessstudiospringboot.controller;
 
 import org.springframework.ui.Model;
@@ -45,3 +46,4 @@ public class GlobalModelAttributes {
         model.addAttribute("loggedIn", false);
     }
 }
+*/

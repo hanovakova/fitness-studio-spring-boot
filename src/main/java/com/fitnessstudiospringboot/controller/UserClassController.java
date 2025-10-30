@@ -1,3 +1,4 @@
+/*
 package com.fitnessstudiospringboot.controller;
 
 import com.fitnessstudiospringboot.model.UserClassKey;
@@ -24,7 +25,8 @@ public class UserClassController {
         this.userClassService = userClassService;
     }
 
-    @GetMapping("/selected")
+    */
+/*@GetMapping("/selected")
     public String viewSelectedClasses(HttpSession session, Model model) {
         Integer userId = (Integer) session.getAttribute("userId");
         FitnessClassController.setEnrolledClassesInSession(session, userId, userClassService, fitnessClassService);
@@ -32,7 +34,8 @@ public class UserClassController {
         boolean isLoggedIn = session.getAttribute("loggedIn") != null && (boolean) session.getAttribute("loggedIn");
         model.addAttribute("loggedIn", isLoggedIn);
         return "selectedClassesView";
-    }
+    }*//*
+
 
     @PostMapping("/drop")
     public String dropClass(@RequestParam("enrolledClassId") int enrolledClassId,
@@ -49,4 +52,4 @@ public class UserClassController {
     public String viewPurchasedClasses() {
         return "purchasedClassesView";
     }
-}
+}*/

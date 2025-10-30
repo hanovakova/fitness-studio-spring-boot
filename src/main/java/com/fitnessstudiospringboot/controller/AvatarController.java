@@ -1,3 +1,4 @@
+/*
 package com.fitnessstudiospringboot.controller;
 
 import jakarta.annotation.Resource;
@@ -51,3 +52,4 @@ public class AvatarController {
                 .body((Resource) resource);
     }
 }
+*/

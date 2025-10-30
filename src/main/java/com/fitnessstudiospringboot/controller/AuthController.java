@@ -1,3 +1,4 @@
+/*
 package com.fitnessstudiospringboot.controller;
 
 import com.fitnessstudiospringboot.controller.bean.RegistrationBean;
@@ -163,3 +164,4 @@ public class AuthController {
         return user;
     }
 }
+*/

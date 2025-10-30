@@ -2,7 +2,9 @@ package com.fitnessstudiospringboot.service;
 
 import com.fitnessstudiospringboot.model.FitnessClass;
 import com.fitnessstudiospringboot.repository.FitnessClassRepository;
+import com.fitnessstudiospringboot.util.BeanCopyUtils;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,8 +20,8 @@ public class FitnessClassService {
     }
 
     @Transactional
-    public void add(FitnessClass cl) {
-        repo.save(cl);
+    public Integer add(FitnessClass cl) {
+        return repo.save(cl).getId();
     }
 
     @Transactional(readOnly = true)
@@ -58,13 +60,36 @@ public class FitnessClassService {
     }
 
     @Transactional
-    public boolean isClassCapacityExceeded(Integer fitnessClassId, Integer numberOfSignedUpClasses) {
+    public boolean isClassCapacityExceeded(Integer id, Integer numberOfSignedUpClasses) {
 
-        FitnessClass fitnessClass = repo.findByIdWithLock(fitnessClassId)
-                .orElseThrow(() -> new EntityNotFoundException("Fitness class not found with ID: " + fitnessClassId));
+        FitnessClass fitnessClass = repo.findByIdWithLock(id)
+                .orElseThrow(() -> new EntityNotFoundException("Fitness class not found with ID: " + id));
 
         int classCapacity = fitnessClass.getCapacity();
 
         return numberOfSignedUpClasses >= classCapacity;
+    }
+
+    @Transactional
+    public FitnessClass updateClass(int id, FitnessClass fitnessClassDetails) {
+        FitnessClass fitnessClass = repo.findByIdWithLock(id)
+                .orElseThrow(() -> new EntityNotFoundException("Fitness class not found with ID: " + id));
+
+        BeanUtils.copyProperties(fitnessClassDetails, fitnessClass, "id");
+        return repo.save(fitnessClass);
+    }
+
+    @Transactional
+    public FitnessClass partialUpdateClass(int id, FitnessClass fitnessClassDetails) {
+        FitnessClass fitnessClass = repo.findByIdWithLock(id)
+                .orElseThrow(() -> new EntityNotFoundException("Fitness class not found with ID: " + id));
+
+        BeanCopyUtils.copyNonNullProperties(fitnessClassDetails, fitnessClass);
+        return fitnessClass;
+    }
+
+    @Transactional
+    public void deleteClass(int id) {
+        repo.deleteById(id);
     }
 }

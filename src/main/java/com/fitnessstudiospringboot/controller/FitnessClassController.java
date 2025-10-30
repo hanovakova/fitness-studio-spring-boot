@@ -1,38 +1,42 @@
 package com.fitnessstudiospringboot.controller;
 
 import com.fitnessstudiospringboot.model.FitnessClass;
-import com.fitnessstudiospringboot.model.UserClass;
-import com.fitnessstudiospringboot.model.UserClassKey;
 import com.fitnessstudiospringboot.service.FitnessClassService;
-import com.fitnessstudiospringboot.service.UserClassService;
-import jakarta.servlet.http.HttpSession;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/fitnessClasses")
+@Tag(name = "Fitness Class Management", description = "Endpoints for creating, retrieving, updating, and deleting fitness classes.")
 public class FitnessClassController {
 
     private final FitnessClassService fitnessClassService;
-    private final UserClassService userClassService;
 
-    public FitnessClassController(FitnessClassService fitnessClassService,
-                                  UserClassService userClassService) {
+    public FitnessClassController(FitnessClassService fitnessClassService) {
         this.fitnessClassService = fitnessClassService;
-        this.userClassService = userClassService;
     }
 
+    @Operation(summary = "Get all fitness classes", description = "Retrieves a list of all fitness classes, with optional filtering by class time and type.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved list of classes",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = FitnessClass.class)))
+    })
     @GetMapping
-    public String showClasses(
+    public List<FitnessClass> showClasses(
+            @Parameter(description = "Filter by class time (e.g., 'morning', 'afternoon')", example = "morning")
             @RequestParam(required = false) String classTime,
-            @RequestParam(required = false) String classType,
-            Model model, HttpSession session) {
+            @Parameter(description = "Filter by class type (e.g., 'yoga', 'spin')", example = "yoga")
+            @RequestParam(required = false) String classType) {
 
         List<FitnessClass> classes = fitnessClassService.getClasses();
         if (classTime != null && !classTime.isBlank()) {
@@ -42,90 +46,97 @@ public class FitnessClassController {
         if (classType != null && !classType.isBlank()) {
             classes = fitnessClassService.getClassesByClassType(classType.toLowerCase(), classes);
         }
-
-        Map<String, Boolean> classIdsPaid = new HashMap<>();
-        Map<String, Boolean> classIdsCapacityExceeded = new HashMap<>();
-
-        Integer userId = (Integer) session.getAttribute("userId");
-        if (userId != null) {
-
-            List<Integer> enrolledClassIds = userClassService.getEnrolledClassIds(userId);
-            for (Integer classId : enrolledClassIds) {
-                UserClassKey key = new UserClassKey(userId, classId);
-                classIdsPaid.put(String.valueOf(classId), userClassService.isPaid(key));
-            }
-        }
-
-        for (FitnessClass fitnessClass : classes) {
-            int classId = fitnessClass.getId();
-            int numberOfSignedUpClasses = userClassService.getNumberOfSignedUpClasses(classId);
-            boolean isClassCapacityExceeded = fitnessClassService.isClassCapacityExceeded(classId, numberOfSignedUpClasses);
-
-            classIdsCapacityExceeded.put(String.valueOf(classId),isClassCapacityExceeded);
-        }
-
-        boolean isLoggedIn = session.getAttribute("loggedIn") != null && (boolean) session.getAttribute("loggedIn");
-        model.addAttribute("loggedIn", isLoggedIn);
-
-        setEnrolledClassesInSession(session, userId, userClassService, fitnessClassService);
-
-        model.addAttribute("timeOptions", List.of("Morning", "Afternoon", "Evening"));
-        model.addAttribute("typeOptions", Map.of(
-                "FitnessClass", "Fitness Class",
-                "YogaClass", "Yoga",
-                "SpinningClass", "Spinning"
-        ));
-        model.addAttribute("fitnessClasses", classes);
-        model.addAttribute("classTime", classTime);
-        model.addAttribute("classType", classType);
-        model.addAttribute("classIdsPaid", classIdsPaid);
-        model.addAttribute("classIdsCapacityExceeded", classIdsCapacityExceeded);
-
-        return "fitnessClassesView";
+        return classes;
     }
 
-    static void setEnrolledClassesInSession(HttpSession session, Integer userId, UserClassService userClassService, FitnessClassService fitnessClassService) {
-        List<Integer> enrolledClassIds = new ArrayList<>();
-        if (userId != null) {
-            enrolledClassIds = userClassService.getEnrolledClassIds(userId);
-        }
-
-        List<FitnessClass> enrolledClasses = new ArrayList<>();
-        if (!enrolledClassIds.isEmpty()) {
-            for (Integer classId : enrolledClassIds) {
-                UserClassKey key = new UserClassKey(userId, classId);
-                if (!userClassService.isPaid(key)) {
-                    enrolledClasses.add(fitnessClassService.getClassById(classId));
-                }
-            }
-        }
-        session.setAttribute("enrolledClassIds", enrolledClassIds);
-        session.setAttribute("enrolledClasses", enrolledClasses);
+    @Operation(summary = "Get a fitness class by ID", description = "Retrieves a single fitness class using its unique identifier.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the class",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = FitnessClass.class))),
+            @ApiResponse(responseCode = "404", description = "Class not found with the given ID",
+                    content = @Content)
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<FitnessClass> getClassById(
+            @Parameter(description = "Identifier of the class to be retrieved", required = true, example = "1")
+            @PathVariable int id) {
+        FitnessClass fitnessClass = fitnessClassService.getClassById(id);
+        return ResponseEntity.ok(fitnessClass);
     }
 
+    @Operation(summary = "Add a new fitness class", description = "Creates a new fitness class and returns its generated ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Class successfully created",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Integer.class, example = "10"))),
+            @ApiResponse(responseCode = "400", description = "Invalid class data provided",
+                    content = @Content)
+    })
     @PostMapping
-    @ResponseBody
-    public Map<String, Object> signUpForClass(@RequestParam("classId") int classId, HttpSession session) {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<Integer> addClass(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The fitness class object to be created. ID will be auto-generated.", required = true,
+                    content = @Content(schema = @Schema(implementation = FitnessClass.class)))
+            @RequestBody FitnessClass fitnessClass) {
+        Integer id = fitnessClassService.add(fitnessClass);
+        return ResponseEntity.ok(id);
+    }
 
-        Integer userId = (Integer) session.getAttribute("userId");
-        if (userId == null) {
-            response.put("status", "unauthorized");
-            return response;
-        }
+    @Operation(summary = "Update a fitness class", description = "Updates all fields of an existing fitness class by its ID. This is a full replacement (PUT).")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Class successfully updated",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = FitnessClass.class))),
+            @ApiResponse(responseCode = "404", description = "Class not found with the given ID",
+                    content = @Content),
+            @ApiResponse(responseCode = "400", description = "Invalid class data provided",
+                    content = @Content)
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<FitnessClass> updateClass(
+            @Parameter(description = "Identifier of the class to be updated", required = true, example = "1")
+            @PathVariable int id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The updated fitness class object. All fields will be replaced.", required = true,
+                    content = @Content(schema = @Schema(implementation = FitnessClass.class)))
+            @RequestBody FitnessClass fitnessClassDetails) {
+        FitnessClass updatedClass = fitnessClassService.updateClass(id, fitnessClassDetails);
+        return ResponseEntity.ok(updatedClass);
+    }
 
-        try {
-            int numberOfSignedUpClasses = userClassService.getNumberOfSignedUpClasses(classId);
-            boolean isClassCapacityExceeded = fitnessClassService.isClassCapacityExceeded(classId, numberOfSignedUpClasses);
+    @Operation(summary = "Partially update a fitness class", description = "Partially updates an existing fitness class by its ID. Only provided (non-null) fields in the request will be updated.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Class successfully patched",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = FitnessClass.class))),
+            @ApiResponse(responseCode = "404", description = "Class not found with the given ID",
+                    content = @Content),
+            @ApiResponse(responseCode = "400", description = "Invalid class data provided",
+                    content = @Content)
+    })
+    @PatchMapping("/{id}")
+    public ResponseEntity<FitnessClass> partialUpdateClass(
+            @Parameter(description = "Identifier of the class to be partially updated", required = true, example = "1")
+            @PathVariable int id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "A fitness class object containing only the fields to be updated.", required = true,
+                    content = @Content(schema = @Schema(implementation = FitnessClass.class)))
+            @RequestBody FitnessClass fitnessClassDetails) {
+        FitnessClass updatedClass = fitnessClassService.partialUpdateClass(id, fitnessClassDetails);
+        return ResponseEntity.ok(updatedClass);
+    }
 
-            UserClassKey key = new UserClassKey(userId, classId);
-            UserClass userClass = new UserClass(key, false);
-            userClassService.signUp(userClass, isClassCapacityExceeded);
-            response.put("status", "success");
-        } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", e.getMessage());
-        }
-        return response;
+
+    @Operation(summary = "Delete a fitness class by ID", description = "Deletes a fitness class using its unique identifier.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Class successfully deleted",
+                    content = @Content),
+            @ApiResponse(responseCode = "404", description = "Class not found with the given ID",
+                    content = @Content)
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteClass(
+            @Parameter(description = "Identifier of the class to be deleted", required = true, example = "1")
+            @PathVariable int id) {
+        fitnessClassService.deleteClass(id);
+        return ResponseEntity.noContent().build();
     }
 }

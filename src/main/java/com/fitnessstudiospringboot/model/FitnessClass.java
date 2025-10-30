@@ -1,38 +1,52 @@
 package com.fitnessstudiospringboot.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 
 import java.sql.Timestamp;
+
 @Entity
 @Table(name="fitness_classes")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "class_type", discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorValue("fitness")
+@Schema(
+        name = "FitnessClass",
+        description = "Represents a generic fitness class",
+        discriminatorProperty = "classType",
+        subTypes = {YogaClass.class, SpinningClass.class}
+)
 public class FitnessClass {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "The auto-generated unique identifier for the class.", accessMode = Schema.AccessMode.READ_ONLY, example = "1")
     private Integer id;
+
+    @Schema(description = "The name of the fitness class.", example = "Morning HIIT")
     private String name;
+
+    @Schema(description = "A detailed description of the class.", example = "A high-intensity interval training session to start your day.")
     private String description;
+
+    @Schema(description = "The date and time the class starts.", example = "2025-10-28T09:00:00.000+00:00")
     private Timestamp startTime;
+
+    @Schema(description = "The date and time the class ends.", example = "2025-10-28T10:00:00.000+00:00")
     private Timestamp endTime;
+
+    @Schema(description = "The name of the instructor teaching the class.", example = "Alex Johnson")
     private String instructorName;
+
+    @Schema(description = "The price to attend the class.", example = "25.50")
     private Float price;
+
+    @Schema(description = "The maximum number of participants for the class.", example = "20")
     private Integer capacity;
+
+    @Schema(description = "The URL path to an image for the class.", example = "/images/hiit.jpg")
     private String imagePath;
 
     public FitnessClass() {
-    }
-
-    public FitnessClass(String name, String description, Timestamp startTime, Timestamp endTime, String instructorName, Float price, Integer capacity, String imagePath) {
-        this.name = name;
-        this.description = description;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.instructorName = instructorName;
-        this.price = price;
-        this.capacity = capacity;
-        this.imagePath = imagePath;
     }
 
     public Integer getId() {
@@ -107,6 +121,8 @@ public class FitnessClass {
         this.name = name;
     }
 
+    @Schema(description = "The type of class. This property is used by OpenAPI to distinguish between class types.",
+            example = "FitnessClass", accessMode = Schema.AccessMode.READ_ONLY)
     public String getClassType() {
         return this.getClass().getSimpleName();
     }

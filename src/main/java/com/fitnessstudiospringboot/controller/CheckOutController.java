@@ -1,3 +1,4 @@
+/*
 package com.fitnessstudiospringboot.controller;
 
 import com.fitnessstudiospringboot.model.FitnessClass;
@@ -57,3 +58,4 @@ public class CheckOutController {
         return "redirect:/user-classes/purchased";
     }
 }
+*/

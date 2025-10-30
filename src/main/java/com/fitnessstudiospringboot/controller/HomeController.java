@@ -1,3 +1,4 @@
+/*
 package com.fitnessstudiospringboot.controller;
 
 import org.springframework.stereotype.Controller;
@@ -12,3 +13,4 @@ public class HomeController {
         return "redirect:/fitnessClasses";
     }
 }
+*/

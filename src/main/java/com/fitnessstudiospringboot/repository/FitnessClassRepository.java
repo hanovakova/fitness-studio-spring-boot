@@ -15,4 +15,5 @@ public interface FitnessClassRepository extends JpaRepository<FitnessClass, Inte
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select fc from FitnessClass fc where fc.id = :id")
     Optional<FitnessClass> findByIdWithLock(@Param("id") Integer id);
+
 }
