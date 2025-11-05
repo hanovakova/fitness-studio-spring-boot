@@ -1,4 +1,4 @@
-package com.fitnessstudiospringboot.controller;
+package com.fitnessstudiospringboot.restapi;
 
 import com.fitnessstudiospringboot.model.FitnessClass;
 import com.fitnessstudiospringboot.service.FitnessClassService;
