@@ -17,4 +17,7 @@ public interface UserClassRepository extends JpaRepository<UserClass, UserClassK
 
     @Query("SELECT count(uc) FROM UserClass uc where uc.id.classId = :classId")
     int countUserClassById(@Param("classId") int classId);
+
+    @Query("SELECT uc FROM UserClass uc WHERE uc.id.userId = :userId AND uc.paid = false")
+    List<UserClass> findUnpaidClassesByUserId(@Param("userId") Integer userId);
 }

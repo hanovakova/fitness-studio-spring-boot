@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserClassService {
@@ -53,7 +54,17 @@ public class UserClassService {
         return getClassById(userClassKey).isPaid();
     }
 
+    @Transactional(readOnly = true)
     public List<Integer> getEnrolledClassIds(int userId) {
         return userClassRepo.getUserEnrolledClassIds(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Integer> getUnpaidClassIds(Integer userId) {
+        List<UserClass> unpaidEnrollments = userClassRepo.findUnpaidClassesByUserId(userId);
+
+        return unpaidEnrollments.stream()
+                .map(userClass -> userClass.getId().getClassId())
+                .collect(Collectors.toList());
     }
 }

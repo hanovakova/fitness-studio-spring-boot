@@ -7,7 +7,7 @@
 <body>
 <div class="container">
     <#include "headerView.ftl">
-    <h1>Classes You Purchased</h1>
+    <h1>Your Classes In Processing</h1>
     <table>
         <thead>
         <tr>
@@ -20,14 +20,14 @@
         </tr>
         </thead>
         <tbody>
-        <#list purchasedClasses as enrolledClass>
+        <#list pendingClasses as pendingClass>
             <tr>
-                <td>${enrolledClass.name}</td>
-                <td>${enrolledClass.description}</td>
-                <td>${enrolledClass.startTime}</td>
-                <td>${enrolledClass.endTime}</td>
-                <td>${enrolledClass.instructorName}</td>
-                <td>${enrolledClass.price}</td>
+                <td>${pendingClass.name}</td>
+                <td>${pendingClass.description}</td>
+                <td>${pendingClass.startTime}</td>
+                <td>${pendingClass.endTime}</td>
+                <td>${pendingClass.instructorName}</td>
+                <td>${pendingClass.price}</td>
             </tr>
         </#list>
         </tbody>

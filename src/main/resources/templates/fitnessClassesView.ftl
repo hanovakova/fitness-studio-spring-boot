@@ -83,14 +83,23 @@
                         <#else>-</#if>
                     </td>
                     <td>
+                        <#-- 1. Check if the class is paid for -->
                         <#if classIdsPaid[fitnessClass.id?string]!false>
                             <span class="text-disabled-button">Purchased</span>
+
+                        <#-- 2. Check if enrolled BUT NOT paid (This is "Pending") -->
+                        <#elseif enrolledClassIds?seq_contains(fitnessClass.id)>
+                            <span class="text-disabled-button-pending">Pending</span>
+
+                        <#-- 3. Check if the class is full (and user is not enrolled) -->
                         <#elseif classIdsCapacityExceeded[fitnessClass.id?string]!false>
                             <span class="text-disabled-button">Class is Full</span>
-                        <#elseif enrolledClassIds?seq_contains(fitnessClass.id)>
-                            <span class="text-disabled-button">Already Signed Up</span>
+
+                        <#-- 4. Check if user is not logged in -->
                         <#elseif !loggedIn>
                             <span class="text-disabled-button">Log In First</span>
+
+                        <#-- 5. Otherwise, the user can sign up -->
                         <#else>
                             <form class="table-form">
                                 <input type="hidden" name="classId" value="${fitnessClass.id}"/>

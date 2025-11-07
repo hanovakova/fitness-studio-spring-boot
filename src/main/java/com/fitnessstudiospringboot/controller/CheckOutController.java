@@ -1,6 +1,7 @@
 package com.fitnessstudiospringboot.controller;
 
 import com.fitnessstudiospringboot.config.MessagingConfig;
+import com.fitnessstudiospringboot.dto.FitnessClassDTO;
 import com.fitnessstudiospringboot.dto.PurchaseEvent;
 import com.fitnessstudiospringboot.model.FitnessClass;
 import com.fitnessstudiospringboot.model.UserClassKey;
@@ -41,35 +42,59 @@ public class CheckOutController {
 
     @PostMapping("/checkout")
     public String processCheckout(HttpSession session) {
-
         Integer userId = (Integer) session.getAttribute("userId");
-        List<Integer> enrolledClassIds = new ArrayList<>();
 
-        if (userId != null) {
-            enrolledClassIds = userClassService.getEnrolledClassIds(userId);
+        if (userId == null) {
+            logger.warn("No user ID found in session during checkout.");
+            return "redirect:/login";
         }
 
-        List<FitnessClass> purchasedClasses = new ArrayList<>();
+        // 1️⃣ Only unpaid classes = newly added ones
+        List<Integer> unpaidClassIds = userClassService.getUnpaidClassIds(userId);
+
+        if (unpaidClassIds.isEmpty()) {
+            logger.info("No unpaid classes to purchase for user {}.", userId);
+            return "redirect:/user-classes/purchased";
+        }
+
+        // 2️⃣ Collect those unpaid classes
+        List<FitnessClass> unpaidClasses = new ArrayList<>();
         float purchaseSum = 0f;
 
-        // Mark classes as paid
-        for (Integer classId : enrolledClassIds) {
-            UserClassKey userClassKey = new UserClassKey(userId, classId);
-            userClassService.setPaid(userClassKey, true);
-
-            FitnessClass purchasedClass = fitnessClassService.getClassById(classId);
-            purchasedClasses.add(purchasedClass);
-
-            if (purchasedClass.getPrice() != null) {
-                purchaseSum += purchasedClass.getPrice();
+        for (Integer classId : unpaidClassIds) {
+            FitnessClass fitnessClass = fitnessClassService.getClassById(classId);
+            if (fitnessClass != null) {
+                unpaidClasses.add(fitnessClass);
+                if (fitnessClass.getPrice() != null) {
+                    purchaseSum += fitnessClass.getPrice();
+                }
             }
         }
+
+        List<FitnessClassDTO> unpaidClassesDTO = unpaidClasses.stream()
+                .map(modelClass -> {
+                    FitnessClassDTO dtoClass =
+                            new FitnessClassDTO();
+
+                    dtoClass.setId(modelClass.getId());
+                    dtoClass.setName(modelClass.getName());
+                    dtoClass.setDescription(modelClass.getDescription());
+                    dtoClass.setStartTime(modelClass.getStartTime());
+                    dtoClass.setEndTime(modelClass.getEndTime());
+                    dtoClass.setInstructorName(modelClass.getInstructorName());
+                    dtoClass.setPrice(modelClass.getPrice());
+                    dtoClass.setCapacity(modelClass.getCapacity());
+                    dtoClass.setImagePath(modelClass.getImagePath());
+
+                    return dtoClass;
+                })
+                .toList();
 
         UUID uuid = UUID.randomUUID();
         PurchaseEvent event = new PurchaseEvent(
                 uuid,
                 userId,
-                purchasedClasses,
+                unpaidClassesDTO,
                 purchaseSum,
                 new Timestamp(System.currentTimeMillis())
         );
@@ -77,11 +102,13 @@ public class CheckOutController {
         try {
             rabbitTemplate.convertAndSend(MessagingConfig.PURCHASE_QUEUE, event);
             logger.info("Sent purchase event for user {} ({} classes, total ${})",
-                    userId, purchasedClasses.size(), purchaseSum);
+                    userId, unpaidClassesDTO.size(), purchaseSum);
         } catch (Exception e) {
             logger.error("Failed to send purchase message to queue: {}", e.getMessage());
         }
-        session.setAttribute("purchasedClasses", purchasedClasses);
+
+        session.setAttribute("pendingClasses", unpaidClasses);
+
 
         // Redirect to purchased classes page
         return "redirect:/user-classes/purchased";
