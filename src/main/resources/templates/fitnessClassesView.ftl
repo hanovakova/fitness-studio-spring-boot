@@ -73,12 +73,12 @@
                     <td>${fitnessClass.instructorName}</td>
                     <td>${fitnessClass.price}</td>
                     <td>
-                        <#if fitnessClass.classType == "YogaClass">
+                        <#if fitnessClass.classType == "YogaClass" && fitnessClass.yogaLevel??>
                             ${fitnessClass.yogaLevel}
                         <#else>-</#if>
                     </td>
                     <td>
-                        <#if fitnessClass.classType == "SpinningClass">
+                        <#if fitnessClass.classType == "SpinningClass" && fitnessClass.bikeType??>
                             ${fitnessClass.bikeType}
                         <#else>-</#if>
                     </td>
